@@ -1,6 +1,12 @@
 const keypress = require('keypress');
 const Command = require('./command');
 
+const emojiCodes = [0x1F34B, 0x1F349, 0x1F34A, 0x1F350, 0x1F95D, 0x1F34E];
+const emojis = emojiCodes.map(code => String.fromCodePoint(code));
+const randomEmoji = () => {
+  return emojis[Math.floor((Math.random()*(emojis.length)))]
+}
+
 class Screen {
 
   static numCols = 0;
@@ -17,6 +23,7 @@ class Screen {
 
   static textColors = [];
   static backgroundColors = [];
+  static emojiCharacters = [];
 
   static message = "";
 
@@ -35,7 +42,12 @@ class Screen {
     Screen.backgroundColors = [];
 
     for (let row = 0 ; row < numRows ; row++) {
-      Screen.grid.push(new Array(numCols).fill(" "));
+      let row = new Array(numCols);
+      for (let i = 0; i < row.length; i++) {
+        row[i] = randomEmoji();
+      }
+
+      Screen.grid.push(row);
       Screen.textColors.push(new Array(numCols).fill(Screen.defaultTextColor));
       Screen.backgroundColors.push(new Array(numCols).fill(Screen.defaultBackgroundColor));
     }
@@ -90,10 +102,11 @@ class Screen {
   static setGrid(row, col, char) {
     if (!Screen.initialized) return;
 
-    if (char.length !== 1) {
-      throw new Error("invalid grid character");
-    }
+    // if (char.length !== 1) {
+    //   throw new Error("invalid grid character");
+    // }
     Screen.grid[row][col] = char;
+    Screen.render();
   }
 
 
@@ -168,6 +181,8 @@ class Screen {
 
     console.log(Screen.message);
 
+    Screen.printCommands();
+
   }
 
   static setTextColor(row, col, color) {
@@ -216,7 +231,10 @@ class Screen {
       throw new Error("Invalid background color");
     }
 
+
+    console.log("code", code);
     Screen.backgroundColors[row][col] = code;
+    Screen.render();
   }
 
   static setMessage(msg) {
