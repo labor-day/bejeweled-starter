@@ -33,7 +33,7 @@ class Bejeweled {
     Screen.addCommand("right", "move right", Bejeweled.moveRight.bind(this));
     Screen.addCommand("return", "select fruit", Bejeweled.select.bind(this));
 
-    Bejeweled.addressMatches(Screen.grid, this);
+    Bejeweled.addressMatches(Screen.grid, this, 0, true);
 
     this.score = 0;
     this.combo = 0;
@@ -167,7 +167,7 @@ class Bejeweled {
     this.cursor.right();
   }
 
-  static addressMatches(grid, context, combo) {
+  static addressMatches(grid, context, combo, startOfGame) {
 
     combo = combo || 1;
 
@@ -180,9 +180,17 @@ class Bejeweled {
     matches.forEach(match => {
       Screen.setGrid(match.row, match.col, String.fromCodePoint(0x1F4A3));
       context.score += (1*combo);
+        if (startOfGame){
+          context.score = 0
+          combo = 0;
+        };
       Screen.message = `Good move!\nScore: ${context.score}\nCombo: ${combo}`;
       Screen.render();
     });
+
+
+
+
 
     //add some delay
     setTimeout(() => {
@@ -193,9 +201,19 @@ class Bejeweled {
       //check for matches again
       if (Bejeweled.checkForMatches(grid).length > 0) {
         combo++;
-        Bejeweled.addressMatches(grid, context, combo);
-        Screen.message = `Good move!\nScore: ${context.score}\nCombo: ${combo}`;
-        Screen.render();
+        if (startOfGame) {
+          context.score = 0
+          combo = 0;
+          Bejeweled.addressMatches(grid, context, combo, true);
+          Screen.message = `\nScore: ${context.score}\nCombo: ${combo}`;
+          Screen.render();
+
+        } else {
+          Bejeweled.addressMatches(grid, context, combo, false);
+          Screen.message = `Good move!\nScore: ${context.score}\nCombo: ${combo}`;
+          Screen.render();
+        }
+
       }
     }, 500);
   }
